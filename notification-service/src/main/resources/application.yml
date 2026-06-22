@@ -1,0 +1,52 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: notification-service
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5437/minipay_notifications}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: notification-service-group
+      auto-offset-reset: earliest
+
+africastalking:
+  username: ${AT_USERNAME:sandbox}
+  api-key: ${AT_API_KEY:your-api-key}
+  sms-url: https://api.sandbox.africastalking.com/version1/messaging
+  sender-id: ${AT_SENDER_ID:}
+
+kafka:
+  topics:
+    payment-events: payment.events
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: always
+
+
+logging:
+  level:
+    root: INFO
+    com.minipay: DEBUG
+    org.springframework.kafka: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+
+africastalking:
+  username: ${AT_USERNAME}
+  api-key: ${AT_API_KEY}
+  sms-url: https://api.africastalking.com/version1/messaging
+
+logging:
+  level:
+    root: WARN
+    com.minipay: INFO

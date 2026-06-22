@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5437/minipay_notifications
+    username: postgres
+    password: postgres
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+africastalking:
+  username: sandbox
+  api-key: your-sandbox-api-key
+  sms-url: https://api.sandbox.africastalking.com/version1/messaging
+
+logging:
+  level:
+    com.minipay: DEBUG
+    org.springframework.kafka: DEBUG

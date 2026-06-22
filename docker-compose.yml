@@ -1,0 +1,188 @@
+version: '3.8'
+
+services:
+
+
+  postgres-gateway:
+    image: postgres:15
+    container_name: minipay-postgres-gateway
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: minipay_gateway
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_gateway_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - minipay-network
+
+  postgres-payments:
+    image: postgres:15
+    container_name: minipay-postgres-payments
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: minipay_payments
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_payments_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - minipay-network
+
+  postgres-notifications:
+    image: postgres:15
+    container_name: minipay-postgres-notifications
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: minipay_notifications
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_notifications_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - minipay-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: minipay-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - minipay-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: minipay-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - minipay-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: minipay-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: minipay-kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - minipay-network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: minipay-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres-gateway:5432/minipay_gateway
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: minipay-super-secret-key-change-in-production-min-256-bits
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+    depends_on:
+      postgres-gateway:
+        condition: service_healthy
+    networks:
+      - minipay-network
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: minipay-payment-service
+    ports:
+      - "8081:8081"
+    environment:
+      DB_URL: jdbc:postgresql://postgres-payments:5432/minipay_payments
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: minipay-super-secret-key-change-in-production-min-256-bits
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      MPESA_CONSUMER_KEY: ${MPESA_CONSUMER_KEY}
+      MPESA_CONSUMER_SECRET: ${MPESA_CONSUMER_SECRET}
+      MPESA_PASSKEY: ${MPESA_PASSKEY}
+      MPESA_CALLBACK_URL: ${MPESA_CALLBACK_URL}
+    depends_on:
+      postgres-payments:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - minipay-network
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: minipay-notification-service
+    ports:
+      - "8082:8082"
+    environment:
+      DB_URL: jdbc:postgresql://postgres-notifications:5432/minipay_notifications
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      AT_USERNAME: ${AT_USERNAME:-sandbox}
+      AT_API_KEY: ${AT_API_KEY:-your-api-key}
+    depends_on:
+      postgres-notifications:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - minipay-network
+
+volumes:
+  postgres_gateway_data:
+  postgres_payments_data:
+  postgres_notifications_data:
+
+
+networks:
+  minipay-network:
+    driver: bridge

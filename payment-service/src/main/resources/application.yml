@@ -1,0 +1,116 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: payment-service
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5436/minipay_payments}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret: ${JWT_SECRET:minipay-super-secret-key-change-in-production-min-256-bits}
+
+
+  task:
+    execution:
+      pool:
+        core-size: 5
+        max-size: 20
+        queue-capacity: 100
+      thread-name-prefix: minipay-async-
+
+jwt:
+  secret: ${JWT_SECRET:minipay-super-secret-key-change-in-production-min-256-bits}
+
+kafka:
+  topics:
+    payment-events: payment.events
+
+mpesa:
+  base-url: ${MPESA_BASE_URL:https://sandbox.safaricom.co.ke}
+  consumer-key: ${MPESA_CONSUMER_KEY:your-consumer-key}
+  consumer-secret: ${MPESA_CONSUMER_SECRET:your-consumer-secret}
+  shortcode: ${MPESA_SHORTCODE:174379}
+  passkey: ${MPESA_PASSKEY:your-passkey}
+  callback-url: ${MPESA_CALLBACK_URL:http://localhost:8081/api/payments/mpesa/callback}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      mpesa-gateway:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 5s
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 100
+        slow-call-duration-threshold: 3s
+      card-gateway:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+  retry:
+    instances:
+      mpesa-gateway:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+      card-gateway:
+        max-attempts: 2
+        wait-duration: 500ms
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, circuitbreakers
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+logging:
+  level:
+    root: INFO
+    com.minipay: DEBUG
+    org.springframework.kafka: INFO
+    io.github.resilience4j: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

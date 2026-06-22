@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+
+  cloud:
+    gateway:
+      routes:
+        - id: payment-service
+          uri: ${PAYMENT_SERVICE_URL:http://payment-service:8081}
+          predicates:
+            - Path=/api/payments/**
+
+        - id: notification-service
+          uri: ${NOTIFICATION_SERVICE_URL:http://notification-service:8082}
+          predicates:
+            - Path=/api/notifications/**
+
+logging:
+  level:
+    root: WARN
+    com.minipay: INFO
