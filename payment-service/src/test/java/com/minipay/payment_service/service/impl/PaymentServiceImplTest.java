@@ -84,13 +84,13 @@ class PaymentServiceImplTest {
                 .status(PaymentStatus.PENDING)
                 .build();
 
-        paymentResponse = PaymentResponse.builder()
-                .id("payment-123")
-                .idempotencyKey("idem-key-123")
-                .amount(new BigDecimal("100.00"))
-                .currency("KES")
-                .status(PaymentStatus.SUCCESS)
-                .build();
+        paymentResponse = new PaymentResponse();
+
+        paymentResponse.setId("payment-123");
+        paymentResponse.setIdempotencyKey("idem-key-123");
+        paymentResponse.setAmount(new BigDecimal("100.00"));
+        paymentResponse.setCurrency("KES");
+        paymentResponse.setStatus(PaymentStatus.SUCCESS);
 
         successGatewayResponse = GatewayResponse.builder()
                 .success(true)
@@ -190,11 +190,10 @@ class PaymentServiceImplTest {
         when(mpesaGateway.processPayment(any(Payment.class)))
                 .thenReturn(failedGatewayResponse);
 
-        PaymentResponse failedResponse = PaymentResponse.builder()
-                .id("payment-123")
-                .status(PaymentStatus.FAILED)
-                .failureReason("Insufficient funds")
-                .build();
+        PaymentResponse failedResponse =  new PaymentResponse();
+        failedResponse.setId("payment-123");
+        failedResponse.setStatus(PaymentStatus.FAILED);
+        failedResponse.setFailureReason("Insufficient funds");
         when(paymentMapper.toResponse(any(Payment.class)))
                 .thenReturn(failedResponse);
         when(idempotencyService.hashRequest(any()))

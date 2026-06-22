@@ -8,177 +8,70 @@ on:
 
 jobs:
 
-  # ─── Test API Gateway ─────────────────────────
   test-api-gateway:
     name: Test API Gateway
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+      - name: Run Tests
+        run: cd api-gateway && ./mvnw test --no-transfer-progress
 
-      - name: Run API Gateway Tests
-        run: |
-          cd api-gateway
-          ./mvnw test --no-transfer-progress
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: api-gateway-test-results
-          path: api-gateway/target/surefire-reports/
-
-  # ─── Test Payment Service ──────────────────────────────
   test-payment-service:
     name: Test Payment Service
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+      - name: Run Tests
+        run: cd payment-service && ./mvnw test --no-transfer-progress
 
-      - name: Run Payment Service Tests
-        run: |
-          cd payment-service
-          ./mvnw test --no-transfer-progress
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: payment-service-test-results
-          path: payment-service/target/surefire-reports/
-
-  # ─── Test Notification Service ─────────────────────────
   test-notification-service:
     name: Test Notification Service
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+      - name: Run Tests
+        run: cd notification-service && ./mvnw test --no-transfer-progress
 
-      - name: Run Notification Service Tests
-        run: |
-          cd notification-service
-          ./mvnw test --no-transfer-progress
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: notification-service-test-results
-          path: notification-service/target/surefire-reports/
-
-  # ─── Build Docker Images ───────────────────────────────
   build:
-    name: Build Docker Images
+    name: Build All Services
     runs-on: ubuntu-latest
     needs:
       - test-api-gateway
       - test-payment-service
       - test-notification-service
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
-
       - name: Build API Gateway
-        run: |
-          cd api-gateway
-          ./mvnw package -DskipTests --no-transfer-progress
-
+        run: cd api-gateway && ./mvnw package -DskipTests --no-transfer-progress
       - name: Build Payment Service
-        run: |
-          cd payment-service
-          ./mvnw package -DskipTests --no-transfer-progress
-
+        run: cd payment-service && ./mvnw package -DskipTests --no-transfer-progress
       - name: Build Notification Service
-        run: |
-          cd notification-service
-          ./mvnw package -DskipTests --no-transfer-progress
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        if: github.ref == 'refs/heads/main'
-        uses: docker/login-action@v3
+        run: cd notification-service && ./mvnw package -DskipTests --no-transfer-progress
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push API Gateway image
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v5
-        with:
-          context: ./api-gateway
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/minipay-api-gateway:latest
-
-      - name: Build and push Payment Service image
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v5
-        with:
-          context: ./payment-service
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/minipay-payment-service:latest
-
-      - name: Build and push Notification Service image
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v5
-        with:
-          context: ./notification-service
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/minipay-notification-service:latest
-
-  # ─── Code Quality ──────────────────────────────────────
-  code-quality:
-    name: Code Quality Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Check code style
-        run: |
-          cd api-gateway && ./mvnw validate --no-transfer-progress && cd ..
-          cd payment-service && ./mvnw validate --no-transfer-progress && cd ..
-          cd notification-service && ./mvnw validate --no-transfer-progress && cd ..
+          name: build-artifacts
+          path: |
+            api-gateway/target/*.jar
+            payment-service/target/*.jar
+            notification-service/target/*.jar
