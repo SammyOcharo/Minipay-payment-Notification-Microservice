@@ -120,6 +120,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      SPRING_PROFILES_ACTIVE: prod
       DB_URL: jdbc:postgresql://postgres-gateway:5432/minipay_gateway
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
@@ -140,6 +141,7 @@ services:
     ports:
       - "8081:8081"
     environment:
+      SPRING_PROFILES_ACTIVE: prod
       DB_URL: jdbc:postgresql://postgres-payments:5432/minipay_payments
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
@@ -165,6 +167,7 @@ services:
     ports:
       - "8082:8082"
     environment:
+      SPRING_PROFILES_ACTIVE: prod
       DB_URL: jdbc:postgresql://postgres-notifications:5432/minipay_notifications
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
