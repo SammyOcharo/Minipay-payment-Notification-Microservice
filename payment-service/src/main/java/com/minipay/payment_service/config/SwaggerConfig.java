@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
                 )
         ),
         servers = {
-                @Server(url = "http://localhost:8080", description = "API Gateway")
+                @Server(url = "http://34.246.208.69:8080", description = "API Gateway")
         }
 )
 @SecurityScheme(
