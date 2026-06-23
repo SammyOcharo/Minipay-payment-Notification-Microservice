@@ -38,7 +38,11 @@ public class SecurityConfig {
                         // Swagger
                         .requestMatchers(
                                 "/swagger-ui/**",
-                                "/api-docs/**").permitAll()
+                                "/swagger-ui.html",
+                                "/api-docs/**",
+                                "/webjars/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
                         // Actuator
                         .requestMatchers("/actuator/**").permitAll()
                         // Everything else requires JWT
