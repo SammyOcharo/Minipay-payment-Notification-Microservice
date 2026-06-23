@@ -180,7 +180,7 @@ public class PaymentServiceImpl implements PaymentService {
                         .map(i -> String.valueOf(i.get("Value")))
                         .findFirst().orElse("UNKNOWN");
 
-                payment.setStatus(PaymentStatus.SUCCESS);
+                payment.setStatus(PaymentStatus.COMPLETED);
                 payment.setMpesaReceiptNumber(receiptNumber);
                 payment.setCompletedAt(LocalDateTime.now());
                 log.info("M-PESA payment SUCCESS. Receipt: {}",

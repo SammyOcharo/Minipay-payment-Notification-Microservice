@@ -1,4 +1,30 @@
 package com.minipay.payment_service.config;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@OpenAPIDefinition(
+        info = @Info(
+                title = "MiniPay Payment Service API",
+                version = "1.0",
+                description = "Payment microservice handling M-PESA and Card payments " +
+                        "with idempotency, circuit breaker and Kafka event streaming",
+                contact = @Contact(
+                        name = "MiniPay Team",
+                        email = "support@minipay.com"
+                )
+        )
+)
+@SecurityScheme(
+        name = "Bearer Authentication",
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "JWT",
+        scheme = "bearer"
+)
 public class SwaggerConfig {
 }

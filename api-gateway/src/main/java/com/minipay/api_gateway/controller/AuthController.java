@@ -4,6 +4,8 @@ import com.minipay.api_gateway.dto.AuthResponse;
 import com.minipay.api_gateway.dto.LoginRequest;
 import com.minipay.api_gateway.dto.RegisterRequest;
 import com.minipay.api_gateway.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +22,13 @@ import reactor.core.scheduler.Schedulers;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "Register and login endpoints")
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/register")
+    @Operation(summary = "Register a new user")
     public Mono<ResponseEntity<AuthResponse>> register(
             @Valid @RequestBody RegisterRequest request) {
         return Mono.fromCallable(() -> authService.register(request))
@@ -35,6 +39,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Login with email and password")
     public Mono<ResponseEntity<AuthResponse>> login(
             @Valid @RequestBody LoginRequest request) {
         return Mono.fromCallable(() -> authService.login(request))

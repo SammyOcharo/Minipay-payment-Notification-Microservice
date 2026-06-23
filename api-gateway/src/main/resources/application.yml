@@ -26,8 +26,10 @@ spring:
         cors-configurations:
           '[/**]':
             allowedOrigins:
-              - "http://localhost:3000"   # React frontend
-              - "http://localhost:5173"   # Vite frontend
+              - "http://localhost:3000"
+              - "http://localhost:5173"
+              - "http://34.246.208.69:8080"
+              - "http://34.246.208.69"
             allowedMethods:
               - GET
               - POST
@@ -81,6 +83,13 @@ jwt:
   secret: ${JWT_SECRET:minipay-super-secret-key-change-in-production-min-256-bits}
   expiration: 86400000     # 24 hours in milliseconds
   refresh-expiration: 604800000  # 7 days in milliseconds
+
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
 
 logging:
   level:

@@ -38,6 +38,12 @@ public class SecurityConfig {
                         // OAuth2
                         .pathMatchers("/oauth2/**",
                                 "/login/oauth2/**").permitAll()
+                        .pathMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/api-docs/**",
+                                "/webjars/**"
+                        ).permitAll()
                         // Actuator
                         .pathMatchers("/actuator/**").permitAll()
                         // Everything else requires authentication
