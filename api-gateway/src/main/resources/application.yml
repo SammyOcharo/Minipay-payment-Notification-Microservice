@@ -14,13 +14,18 @@ spring:
             - Path=/api/payments/**
           filters:
             - StripPrefix=0
-
         - id: notification-service
           uri: http://notification-service:8082
           predicates:
             - Path=/api/notifications/**
           filters:
             - StripPrefix=0
+        - id: payment-swagger
+          uri: http://payment-service:8081
+          predicates:
+            - Path=/payment/swagger-ui/**,/payment/api-docs/**
+          filters:
+            - StripPrefix=1
 
       globalcors:
         cors-configurations:
