@@ -89,7 +89,8 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_HEAP_OPTS: "-Xmx128m -Xms64m"
+      KAFKA_HEAP_OPTS: "-Xmx256m -Xms128m"
+      KAFKA_LOG_CLEANER_THREADS: 1
     healthcheck:
       test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092" ]
       interval: 30s
@@ -144,6 +145,7 @@ services:
     ports:
       - "8081:8081"
     environment:
+      JAVA_TOOL_OPTIONS: "-Xmx200m -Xms100m"
       SPRING_PROFILES_ACTIVE: prod
       DB_URL: jdbc:postgresql://postgres-payments:5432/minipay_payments
       DB_USERNAME: postgres
@@ -170,6 +172,7 @@ services:
     ports:
       - "8082:8082"
     environment:
+      JAVA_TOOL_OPTIONS: "-Xmx200m -Xms100m"
       SPRING_PROFILES_ACTIVE: prod
       DB_URL: jdbc:postgresql://postgres-notifications:5432/minipay_notifications
       DB_USERNAME: postgres
