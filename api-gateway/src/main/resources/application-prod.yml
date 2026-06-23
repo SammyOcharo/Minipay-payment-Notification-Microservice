@@ -28,8 +28,8 @@ logging:
     com.minipay: INFO
 
 
-  # application-prod.yml (payment-service)
-  springdoc:
-    servers:
-      - url: http://34.246.208.69:8080
-        description: Production server
+# application-prod.yml (payment-service)
+springdoc:
+  servers:
+    - url: http://34.246.208.69:8080
+      description: Production server
