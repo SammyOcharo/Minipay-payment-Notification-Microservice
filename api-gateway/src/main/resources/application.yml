@@ -1,10 +1,8 @@
 server:
   port: 8080
-
 spring:
   application:
     name: api-gateway
-
   cloud:
     gateway:
       routes:
@@ -26,7 +24,12 @@ spring:
             - Path=/payment/swagger-ui/**,/payment/api-docs/**
           filters:
             - StripPrefix=1
-
+        - id: notification-swagger
+          uri: http://notification-service:8082
+          predicates:
+            - Path=/notification/swagger-ui/**,/notification/api-docs/**
+          filters:
+            - StripPrefix=1
       globalcors:
         cors-configurations:
           '[/**]':
@@ -45,7 +48,6 @@ spring:
             allowedHeaders:
               - "*"
             allowCredentials: true
-
   security:
     oauth2:
       resourceserver:
@@ -59,13 +61,11 @@ spring:
             scope:
               - email
               - profile
-
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5435/minipay_gateway}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
-
   jpa:
     open-in-view: false
     hibernate:
@@ -75,7 +75,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-
 management:
   endpoints:
     web:
@@ -84,19 +83,22 @@ management:
   endpoint:
     health:
       show-details: when-authorized
-
 jwt:
   secret: ${JWT_SECRET:minipay-super-secret-key-change-in-production-min-256-bits}
-  expiration: 86400000     # 24 hours in milliseconds
-  refresh-expiration: 604800000  # 7 days in milliseconds
-
-
+  expiration: 86400000
+  refresh-expiration: 604800000
 springdoc:
   api-docs:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
-
+    urls:
+      - name: api-gateway
+        url: /api-docs
+      - name: payment-service
+        url: /payment/api-docs
+      - name: notification-service
+        url: /notification/api-docs
 logging:
   level:
     root: INFO

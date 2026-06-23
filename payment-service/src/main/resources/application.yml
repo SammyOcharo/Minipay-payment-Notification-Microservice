@@ -104,11 +104,7 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
-    urls:
-      - name: api-gateway
-        url: /api-docs
-      - name: payment-service
-        url: /payment/api-docs
+    operations-sorter: method
 
 logging:
   level:
