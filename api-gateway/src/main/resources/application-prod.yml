@@ -3,12 +3,10 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-
   jpa:
     show-sql: false
     hibernate:
       ddl-auto: validate
-
   cloud:
     gateway:
       routes:
@@ -16,19 +14,22 @@ spring:
           uri: ${PAYMENT_SERVICE_URL:http://payment-service:8081}
           predicates:
             - Path=/api/payments/**
-
         - id: notification-service
           uri: ${NOTIFICATION_SERVICE_URL:http://notification-service:8082}
           predicates:
             - Path=/api/notifications/**
+        - id: payment-swagger
+          uri: http://payment-service:8081
+          predicates:
+            - Path=/payment/swagger-ui/**,/payment/api-docs/**
+          filters:
+            - StripPrefix=1
 
 logging:
   level:
     root: WARN
     com.minipay: INFO
 
-
-# application-prod.yml (payment-service)
 springdoc:
   servers:
     - url: http://34.246.208.69:8080
