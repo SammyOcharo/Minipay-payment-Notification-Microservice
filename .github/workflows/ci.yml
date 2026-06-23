@@ -79,18 +79,64 @@ jobs:
     name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: build
-    # Only deploy on push to main, not on PRs or develop
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-      - name: Deploy via SSH
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      - name: Create target directories on EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/minipay
+            mkdir -p ~/Minipay-payment-Notification-Microservice/api-gateway/target
+            mkdir -p ~/Minipay-payment-Notification-Microservice/payment-service/target
+            mkdir -p ~/Minipay-payment-Notification-Microservice/notification-service/target
+
+      - name: Copy JARs to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "api-gateway/target/*.jar"
+          target: "~/Minipay-payment-Notification-Microservice/api-gateway/target/"
+          strip_components: 2
+
+      - name: Copy payment JAR to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "payment-service/target/*.jar"
+          target: "~/Minipay-payment-Notification-Microservice/payment-service/target/"
+          strip_components: 2
+
+      - name: Copy notification JAR to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "notification-service/target/*.jar"
+          target: "~/Minipay-payment-Notification-Microservice/notification-service/target/"
+          strip_components: 2
+
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/Minipay-payment-Notification-Microservice
             git pull origin main
-            docker-compose down
-            docker-compose up -d --build
-            docker-compose ps
+            docker compose up -d --build --no-deps api-gateway payment-service notification-service
+            docker compose ps
