@@ -118,6 +118,7 @@ services:
       context: ./api-gateway
       dockerfile: Dockerfile
     container_name: minipay-api-gateway
+    env_file: .env
     ports:
       - "8080:8080"
     environment:
@@ -139,6 +140,7 @@ services:
       context: ./payment-service
       dockerfile: Dockerfile
     container_name: minipay-payment-service
+    env_file: .env
     ports:
       - "8081:8081"
     environment:

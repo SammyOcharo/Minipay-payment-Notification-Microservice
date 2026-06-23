@@ -24,6 +24,8 @@ spring:
             - Path=/payment/swagger-ui/**,/payment/api-docs/**
           filters:
             - StripPrefix=1
+          metadata:
+            public: true
 
       globalcors:
         cors-configurations:
