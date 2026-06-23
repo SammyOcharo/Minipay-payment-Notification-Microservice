@@ -36,14 +36,25 @@ public class SecurityConfig {
                                 "/api/auth/register",
                                 "/api/auth/login").permitAll()
                         // OAuth2
-                        .pathMatchers("/oauth2/**",
-                                "/login/oauth2/**").permitAll()
                         .pathMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/api-docs/**",
-                                "/webjars/**"
+                                "/oauth2/**",
+                                "/login/**",
+                                "/login/oauth2/**"
                         ).permitAll()
+                        .pathMatchers(
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/api-docs/**",
+                                        "/webjars/**",
+                                        "/payment/swagger-ui/**",
+                                        "/payment/swagger-ui.html",
+                                        "/payment/api-docs/**",
+                                        "/payment/webjars/**",
+                                        "/notification/swagger-ui/**",
+                                        "/notification/swagger-ui.html",
+                                        "/notification/api-docs/**",
+                                        "/notification/webjars/**"
+                                ).permitAll()
                         // Actuator
                         .pathMatchers("/actuator/**").permitAll()
                         // Everything else requires authentication
