@@ -1,14 +1,10 @@
 name: MiniPay CI/CD Pipeline
-
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
-
 jobs:
-
-  # ─── Tests run in parallel ─────────────────────────────
   test-api-gateway:
     name: Test API Gateway
     runs-on: ubuntu-latest
@@ -21,7 +17,6 @@ jobs:
           cache: maven
       - name: Run Tests
         run: cd api-gateway && ./mvnw test --no-transfer-progress
-
   test-payment-service:
     name: Test Payment Service
     runs-on: ubuntu-latest
@@ -34,7 +29,6 @@ jobs:
           cache: maven
       - name: Run Tests
         run: cd payment-service && ./mvnw test --no-transfer-progress
-
   test-notification-service:
     name: Test Notification Service
     runs-on: ubuntu-latest
@@ -47,8 +41,6 @@ jobs:
           cache: maven
       - name: Run Tests
         run: cd notification-service && ./mvnw test --no-transfer-progress
-
-  # ─── Build all JARs ────────────────────────────────────
   build:
     name: Build All Services
     runs-on: ubuntu-latest
@@ -77,38 +69,3 @@ jobs:
             api-gateway/target/*.jar
             payment-service/target/*.jar
             notification-service/target/*.jar
-
-  # ─── Deploy to EC2 ─────────────────────────────────────
-  deploy:
-    name: Deploy to EC2
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - name: Deploy on EC2
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          timeout: 300s
-          command_timeout: 30m
-          script: |
-            cd ~/Minipay-payment-Notification-Microservice
-
-            echo "Pulling latest code..."
-            git pull origin main
-
-            echo "Stopping existing containers..."
-            docker compose down
-
-            echo "Building and starting services..."
-            docker compose up -d --build
-
-            echo "Waiting for services to start..."
-            sleep 30
-
-            echo "Checking service status..."
-            docker compose ps
-
-            echo "Deployment complete!"
