@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PaymentEventConsumer {
-
     private final NotificationService notificationService;
 
     @KafkaListener(
