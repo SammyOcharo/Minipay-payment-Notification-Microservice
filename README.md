@@ -51,8 +51,8 @@ API Gateway (Port 8080)        ← JWT Auth + OAuth2 + Routing
 ---
 ## API Documentation
 
-Swagger UI: http://localhost:8081/swagger-ui/index.html
-API Docs JSON: http://localhost:8081/api-docs
+Swagger UI: http://34.246.208.69:8080/webjars/swagger-ui/index.html
+API Docs JSON: http://34.246.208.69:8080/api-docs
 
 ## Services
 
