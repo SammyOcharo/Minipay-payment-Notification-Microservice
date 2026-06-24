@@ -149,7 +149,7 @@ curl http://localhost:8082/actuator/health
 ### Register
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/register \
+curl -X POST http://34.246.208.69:8080/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "fullName": "John Doe",
@@ -162,7 +162,7 @@ curl -X POST http://localhost:8080/api/auth/register \
 ### Login
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://34.246.208.69:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "john@minipay.com",
@@ -173,7 +173,7 @@ curl -X POST http://localhost:8080/api/auth/login \
 ### Initiate Payment (M-PESA STK Push)
 
 ```bash
-curl -X POST http://localhost:8080/api/payments \
+curl -X POST http://34.246.208.69:8080/api/payments \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Idempotency-Key: $(uuidgen)" \
@@ -189,14 +189,14 @@ curl -X POST http://localhost:8080/api/payments \
 ### Get Payment
 
 ```bash
-curl http://localhost:8080/api/payments/{id} \
+curl http://34.246.208.69:8080/api/payments/{id} \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ### Get Payment History
 
 ```bash
-curl http://localhost:8080/api/payments \
+curl http://34.246.208.69:8080/api/payments \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -224,11 +224,8 @@ The Notification Service consumes events and sends SMS via Africa's Talking.
 | Service | URL |
 |---|---|
 | Kafka UI | http://localhost:8090 |
-| Payment Swagger | http://localhost:8081/swagger-ui.html |
-| Gateway Health | http://localhost:8080/actuator/health |
-| Payment Health | http://localhost:8081/actuator/health |
-| Notification Health | http://localhost:8082/actuator/health |
-| Circuit Breakers | http://localhost:8081/actuator/health |
+| Payment Swagger | http://34.246.208.69:8080/swagger-ui.html |
+| Gateway Health | http://34.246.208.69:8080/actuator/health |
 
 ---
 
